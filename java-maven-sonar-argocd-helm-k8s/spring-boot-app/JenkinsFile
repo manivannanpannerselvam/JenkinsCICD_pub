@@ -21,14 +21,16 @@ pipeline {
       }
     }
 
-    stage('Build and Test') {
-      steps {
-        echo 'Building the Spring Boot application...'
-        dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-          sh 'mvn clean package'
-        }
+  stage('Build and Test') {
+    steps {
+      echo 'Checking files...'
+      sh 'ls -l java-maven-sonar-argocd-helm-k8s/spring-boot-app'
+      echo 'Building the Spring Boot application...'
+      dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
+        sh 'mvn -X clean package' // -X enables debug logging
       }
     }
+  }
 //     stage('Static Code Analysis') {
 //       environment {
 //          SONAR_URL = "http://13.213.6.166:9000"
