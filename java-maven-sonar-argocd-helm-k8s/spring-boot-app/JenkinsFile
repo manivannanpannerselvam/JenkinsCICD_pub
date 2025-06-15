@@ -1,39 +1,44 @@
 pipeline {
- agent {
-   docker {
-     image 'maven:3.9.6-eclipse-temurin-17'
-     args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-   }
- }
+  agent {
+    docker {
+      image 'maven:3.9.6-eclipse-temurin-17'
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
+
   stages {
     stage('Cleanup Workspace') {
-        steps {
-          deleteDir() // Cleans the entire workspace (safe before checkout)
-        }
+      steps {
+        echo 'Cleaning up workspace...'
+        deleteDir() // Cleans the entire workspace
+      }
     }
+
     stage('Checkout') {
       steps {
-        sh 'echo passed'
+        echo 'Cloning repository...'
         git branch: 'main', url: 'https://github.com/manivannanpannerselvam/JenkinsCICD_pub.git'
       }
     }
+
     stage('Build and Test') {
       steps {
-        sh 'ls -ltr'
-        // build the project and create a JAR file
-        sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
-      }
-    }
-    stage('Static Code Analysis') {
-      environment {
-         SONAR_URL = "http://13.213.6.166:9000"
-      }
-      steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
+        echo 'Building the Spring Boot application...'
+        dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
+          sh 'mvn clean package'
         }
       }
     }
+//     stage('Static Code Analysis') {
+//       environment {
+//          SONAR_URL = "http://13.213.6.166:9000"
+//       }
+//       steps {
+//         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+//           sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
+//         }
+//       }
+//     }
 //     stage('Build and Push Docker Image') {
 //       environment {
 //         DOCKER_IMAGE = "abhishekf5/ultimate-cicd:${BUILD_NUMBER}"
